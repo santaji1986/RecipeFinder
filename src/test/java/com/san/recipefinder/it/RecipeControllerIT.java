@@ -20,8 +20,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 
 @ExtendWith(SpringExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -102,5 +101,21 @@ public class RecipeControllerIT {
                 .extract()
                 .response();
         assertThat(response.body().asString()).isEqualTo("Success");
+    }
+
+    @Test
+    void testUpdateRecipeFailed() {
+        UpdateRecipePayload updateRecipePayload = new UpdateRecipePayload(10L, true, "recipe1", 2, "Ingredients", "Instructions");
+        Response response = given()
+                .port(port)
+                .when()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(updateRecipePayload)
+                .post("/updateRecipe")
+                .then()
+                .statusCode(NOT_FOUND.value())
+                .extract()
+                .response();
+        assertThat(response.body().asString()).isEqualTo("No recipe found.");
     }
 }
