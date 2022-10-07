@@ -8,17 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.servlet.http.HttpServletRequest;
-
 @RestControllerAdvice
 class RestExceptionAdvice {
     private static final Logger LOGGER = LoggerFactory.getLogger(RestExceptionAdvice.class);
 
     @ExceptionHandler({RecipeNotFoundException.class, EmptyResultDataAccessException.class})
-    ResponseEntity<String> handleRecipeNotFoundException(
-            Exception exception,
-            HttpServletRequest request
-    ) {
+    ResponseEntity<String> handleRecipeNotFoundException(Exception exception) {
         LOGGER.error("Handle exception", exception);
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
@@ -26,10 +21,7 @@ class RestExceptionAdvice {
     }
 
     @ExceptionHandler(Exception.class)
-    ResponseEntity<String> handleException(
-            Exception exception,
-            HttpServletRequest request
-    ) {
+    ResponseEntity<String> handleException(Exception exception) {
         LOGGER.error("Handle exception", exception);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
