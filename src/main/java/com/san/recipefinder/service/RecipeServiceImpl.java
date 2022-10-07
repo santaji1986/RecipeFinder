@@ -19,8 +19,8 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
 
-@Override
-public void addRecipe(AddRecipePayload addRecipePayload) {
+    @Override
+    public void addRecipe(AddRecipePayload addRecipePayload) {
         Recipe recipe = new Recipe();
         recipe.setVegetarian(addRecipePayload.isVegetarian());
         recipe.setRecipeName(addRecipePayload.getRecipeName());
@@ -54,5 +54,10 @@ public void addRecipe(AddRecipePayload addRecipePayload) {
     @Override
     public List<Recipe> getAllRecipes() {
         return recipeRepository.findAll();
+    }
+
+    @Override
+    public List<Recipe> searchAllRecipes(String isVegetarian, String recipeName, String numberOfServings, String ingredients, String instructions) {
+        return recipeRepository.findAllRecipes(isVegetarian,recipeName, numberOfServings, ingredients, instructions);
     }
 }

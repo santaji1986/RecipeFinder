@@ -10,6 +10,9 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
@@ -17,6 +20,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,6 +35,31 @@ import static org.springframework.http.HttpStatus.*;
 public class RecipeControllerIT {
     @LocalServerPort
     private int port;
+
+    public static Stream<Arguments> searchParamsData() {
+        String expectedJson = """
+                [
+                {"id":1,"recipeName":"recipe1","numberOfServings":2,"ingredients":"Ingredients","instructions":"Instructions","vegetarian":true}
+                ]
+                """;
+        return Stream.of(
+                Arguments.of(Map.of("isVegetarian", true), expectedJson),
+                Arguments.of(Map.of("isVegetarian", false), "[]"),
+                Arguments.of(Map.of("recipeName", "recipe1"), expectedJson),
+                Arguments.of(Map.of("numberOfServings", "2"), expectedJson),
+                Arguments.of(Map.of("numberOfServings", "4"), "[]"),
+                Arguments.of(Map.of("ingredients", "ingredients"), expectedJson),
+                Arguments.of(Map.of("instructions", "instructions"), expectedJson),
+                Arguments.of(Map.of(), expectedJson),
+                Arguments.of(Map.of("recipeName", "recipe1",
+                        "numberOfServings", "2",
+                        "ingredients", "ingredients",
+                        "instructions", "instructions",
+                        "isVegetarian", true), expectedJson
+                )
+
+        );
+    }
 
     @Test
     @Order(1)
@@ -87,8 +119,27 @@ public class RecipeControllerIT {
         JSONAssert.assertEquals(response.body().asString(), expectedJson, new CustomComparator(JSONCompareMode.LENIENT));
     }
 
-    @Test
+    @SneakyThrows
+    @ParameterizedTest
     @Order(4)
+    @MethodSource(value = "searchParamsData")
+    void testSearchAllRecipesParameterized(Map<String, ?> map, String expectedJson) {
+        Response response = given()
+                .port(port)
+                .when()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .queryParams(map)
+                .get("/search")
+                .then()
+                .statusCode(OK.value())
+                .extract()
+                .response();
+
+        JSONAssert.assertEquals(response.body().asString(), expectedJson, new CustomComparator(JSONCompareMode.LENIENT));
+    }
+
+    @Test
+    @Order(5)
     void testDeleteRecipe() {
         Response response = given()
                 .port(port)

@@ -48,4 +48,16 @@ public class RecipeController {
         List<Recipe> recipeList = recipeService.getAllRecipes();
         return new ResponseEntity<>(recipeList, HttpStatus.OK);
     }
+
+    @GetMapping(value = "/search")
+    public ResponseEntity<List<Recipe>> search(@RequestParam(required = false, defaultValue = "") String isVegetarian,
+                                               @RequestParam(required = false, defaultValue = "") String recipeName,
+                                               @RequestParam(required = false, defaultValue = "") String numberOfServings,
+                                               @RequestParam(required = false, defaultValue = "") String ingredients,
+                                               @RequestParam(required = false, defaultValue = "") String instructions) {
+        LOGGER.info("Get All Recipes");
+        List<Recipe> recipeList = recipeService.searchAllRecipes(isVegetarian,recipeName,numberOfServings,ingredients,instructions);
+        return new ResponseEntity<>(recipeList, HttpStatus.OK);
+    }
+
 }

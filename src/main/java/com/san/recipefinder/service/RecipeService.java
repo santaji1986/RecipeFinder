@@ -14,4 +14,6 @@ public interface RecipeService {
     void deleteRecipe(Long recipeId);
 
     List<Recipe> getAllRecipes();
+
+    List<Recipe> searchAllRecipes(String isVegetarian, String recipeName, String numberOfServings, String ingredients, String instructions);
 }
